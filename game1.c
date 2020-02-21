@@ -1,17 +1,22 @@
 /*2番 宇山裕大 2048（パズルゲーム）*/
 
 #include<stdio.h>
+#include <signal.h>
 #include <stdlib.h>   /* rand, srand関数を使うため */
 #include <time.h>     /* time関数を使うため */
 
+void show();
 int randam(int masu);
 int randam2(int *null, int n);
+int a[100][100]={0},masu, end=0;
 int main(void)
 {
-   int j=0,tr=0/*bool*/,i,k,r,a[100][100]={0},masu;
+	void stop();
+   int j=0,tr=0/*bool*/,i,k,r;
    //-------------------------------------------------------------
    //初期画面
    printf("縦横の幅="); scanf("%d",&masu);
+	signal(SIGTSTP,stop);//ゲームが始まったらシグナルハンドラ設定
    srand((unsigned int)time(NULL));
       while(tr!=2){
          r=randam(masu*masu);
@@ -26,14 +31,14 @@ int main(void)
    }
    printf("\n");
    //---------------------------------------------------------------
-   int tmp,end=0,null[10000]={0},n=0;
-   char kye;
+   int tmp,null[10000]={0},n=0;
+   char kye[2];
    //操作---------------------------------------------------------------
 //---上移動---------------------------------------------------------------
-   kye='\0';
    while(end==0){
-      kye=getchar();
-      if(kye=='w') {
+      scanf("%s",kye);
+		printf("入力したのは%s",kye);
+      if(kye[0]=='w') {
          for(i=0;i<masu;i++){
             for(j=0;j<masu-1;j++){
                for(k=j+1;k<masu;k++){
@@ -50,10 +55,9 @@ int main(void)
                }
             }
          }
-      printf("w");
       }
 //----した移動-----------------------------------------------------------
-      if(kye=='s') {
+      else if(kye[0]=='s') {
          for(i=0;i<masu;i++){
             for(j=masu-1;j>0;j--){
                for(k=j-1;k>=0;k--){
@@ -70,10 +74,9 @@ int main(void)
                }
             }
          }
-      printf("s");
       }
 //------右移動------------------------------------------------------------
-      if(kye=='d'){
+      else if(kye[0]=='d'){
         for(i=0;i<masu;i++){
             for(j=masu-1;j>0;j--){
                for(k=j-1;k>=0;k--){
@@ -90,10 +93,9 @@ int main(void)
                }
             }
          }
-         printf("d");
       }
 //----左移動-----------------------------------------------------------------
-      if(kye=='a') {
+      else if(kye[0]=='a') {
          for(i=0;i<masu;i++){
             for(j=0;j<masu;j++){
                for(k=j+1;k<masu;k++){
@@ -110,10 +112,12 @@ int main(void)
                }
             }
          }
-      printf("a");
       }
+		else if(kye[0]=='q')
+		{
+			end=1;
+		}
 
-      if(kye=='q') end=1;
       tr=0;
       //空白ヲ渡す
       n=0;
@@ -125,30 +129,16 @@ int main(void)
       }
 
       //2をランダムに代入する
-      if(kye=='a'||kye=='s'||kye=='w'||kye=='d'){
+      if(kye[0]=='a'||kye[0]=='s'||kye[0]=='w'||kye[0]=='d'){
          r=randam2(null,n);
-         //printf("%d\n",r);
          a[r/masu][r%masu]=2;
-         //ログ削除
-         //printf("%c[2J", 27);
-         //画面表示
-         for(i=0;i<masu*masu;i++){
-            if(i%masu==0) printf("\n");
-            if(a[i/masu][i%masu]==0) printf("    -");
-            else printf("%5d",a[i/masu][i%masu]);
-         }
-         printf("\n");
-         //printf("%d",r);
-         //printf("%d",a[r/masu][r%masu]);
+			show();
       }
       printf("\n"); 
-   /*   for(i=0;i<masu*masu;i++){
-         printf("a[%d]=%d\n",i,a[i/masu][i%masu]);
-      }
-   */
    }
-      return 0;
+	return 0;
 }
+
 int randam(int masu)
 {
    int n;
@@ -163,4 +153,22 @@ int randam2(int *null, int n)
    srand((unsigned int)time(NULL));
    r=rand()%n;
    return null[r];
+}
+
+void show()
+{
+	int i=0;
+   //画面表示
+   for(i=0;i<masu*masu;i++){
+      if(i%masu==0) printf("\n");
+      if(a[i/masu][i%masu]==0) printf("    -");
+      else printf("%5d",a[i/masu][i%masu]);
+   }
+   printf("\n");
+}
+
+void stop()
+{
+	//割り込みで操作方法を表示
+	printf("\n操作方法\n右移動a:左移動d:上移動w:下移動s\nゲーム終了q\n");
 }
